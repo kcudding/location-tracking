@@ -32,7 +32,7 @@ public class LocationWorker extends Worker {
     // debugging
     public static final String TAG = "LOCATION_WORKER";
 
-    // used for network requests
+    // CHANGE THIS TO INSTALL LOCATION OF PHP SCRIPT
     String url = "https://www.student.cs.uwaterloo.ca/~j2avery/test.php?";
 
     public LocationWorker(
@@ -48,6 +48,13 @@ public class LocationWorker extends Worker {
         // check if GPS enabled
         GPSTracker gps = GPSTracker.Builder();
         if(gps.canGetLocation()) {
+
+            // what do we use for a unique phone ID?
+            // * telephonyManager ONLY if a SIM card is installed
+            // * wifiManager ONLY if we're connected to Wifi
+            // but MUST work, even if both of these conditions are not met
+            // and MUST NOT CHANGE between executions/reinstallation (so generating is not simple)
+            // ANDROID_ID is unique to the Android OS, need to ensure that iOS doesn't conflict
 
             // get device data
             String imei = "", meid = "";

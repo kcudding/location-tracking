@@ -44,14 +44,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        // what do we use for a unique phone ID?
-        // * telephonyManager ONLY if a SIM card is installed
-        // * wifiManager ONLY if we're connected to Wifi
-        // but MUST work, even if both of these conditions are not met
-        // and MUST NOT CHANGE between executions/reinstallation (so generating is not simple)
-        // ANDROID_ID is unique to the Android OS, need to ensure that iOS doesn't conflict
-
-
         // get data from tracking service
         GPSTracker.Builder().setContext(this.getApplicationContext());
 
