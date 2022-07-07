@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
@@ -15,21 +16,28 @@ import androidx.core.app.ActivityCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import com.android.volley.toolbox.StringRequest;
+
+import java.util.Arrays;
 import java.util.Date;
 
+@RequiresApi(api = Build.VERSION_CODES.Q)
 public class MainActivity extends Activity {
     // used for permission checks
     private static final int REQUEST_CODE_PERMISSION = 2;
-    String mPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+    //String mPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+    String[] mPermissions = new String[]{
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+    };
 
     // tag for debugging
     public static final String TAG = "GPSTRACKER";
 
     // data to fetch from the location service
-    String deviceId = "unavailable", imei = "unavailable", meid = "unavailable";
 
     @SuppressLint("HardwareIds")
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,8 +45,12 @@ public class MainActivity extends Activity {
 
         // check permissions
         try {
-            if (ActivityCompat.checkSelfPermission(this, mPermission) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{mPermission}, REQUEST_CODE_PERMISSION);
+            boolean perms = true;
+            for(String s: mPermissions){
+                perms = perms && (ActivityCompat.checkSelfPermission(this, s) == PackageManager.PERMISSION_GRANTED);
+            }
+            if(!perms){
+                ActivityCompat.requestPermissions(this, mPermissions, REQUEST_CODE_PERMISSION);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,16 +80,8 @@ public class MainActivity extends Activity {
         // start tracking handler
         final Button refresh = (Button) findViewById(R.id.refresh);
         refresh.setOnClickListener(event -> {
-                text.append(LocationWorker.updated + "\n"
-                + "  deviceID: " + deviceId + "\n"
-                + "  imei: " + imei + "\n"
-                + "  meid: " + meid + "\n"
-                + "  provider: " + LocationWorker.location.getProvider() + "\n"
-                + "  fetched: " + new Date(LocationWorker.location.getTime()) + "\n"
-                + "  latitude: " + LocationWorker.location.getLatitude() + "\n"
-                + "  longitude: " + LocationWorker.location.getLongitude() + "\n"
-                + "  altitude: " + LocationWorker.location.getAltitude() + "\n"
-                + "  accuracy: " + LocationWorker.location.getAccuracy() + "\n\n");
-            });
+                text.append(
+                        LocationWorker.updated + "\n"
+                );});
     }
 }
