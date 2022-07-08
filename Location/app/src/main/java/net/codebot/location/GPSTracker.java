@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -72,6 +73,7 @@ public class GPSTracker implements LocationListener {
                             Log.d(TAG, "Network request succeeded");
 
                             if (location != null) {
+                                Log.d(TAG, "Network request succeeded not null");
                                 latitude = location.getLatitude();
                                 longitude = location.getLongitude();
                             }
@@ -87,10 +89,9 @@ public class GPSTracker implements LocationListener {
                     if (location == null) {
                         try {
                             if (locationManager != null) {
-                                Log.d(TAG, "GPS request succeeded");
                                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
                                 if (location != null) {
+                                    Log.d(TAG, "GPS request succeeded");
                                     latitude = location.getLatitude();
                                     longitude = location.getLongitude();
                                 }

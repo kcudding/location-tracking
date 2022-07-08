@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import android.provider.Settings.Secure;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -33,7 +34,7 @@ public class LocationWorker extends Worker {
     public static final String TAG = "LOCATION_WORKER";
 
     // CHANGE THIS TO INSTALL LOCATION OF PHP SCRIPT
-    String url = "https://www.student.cs.uwaterloo.ca/~j2avery/test.php?";
+    String url = "https://multi-plier.ca/?";
 
     public LocationWorker(
             @NonNull Context context,
@@ -57,61 +58,44 @@ public class LocationWorker extends Worker {
             // ANDROID_ID is unique to the Android OS, need to ensure that iOS doesn't conflict
 
             // get device data
-            String imei = "", meid = "";
-            String deviceId = "A" + Settings.Secure.getString(gps.getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            TelephonyManager telephonyManager = (TelephonyManager) gps.getContext().getSystemService(Context.TELEPHONY_SERVICE);
-            if (telephonyManager != null) {
-                try {
-                    imei = telephonyManager.getImei();
-                    meid = telephonyManager.getMeid();
-                } catch (Exception ignored) {
-                }
-            }
+            String imei = "imei", meid = "meid";
+            String deviceId = "deviceID";
 
             // fetch data
             updated = new Date();
             SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             String formatted = dateformat.format(updated);
             location = gps.getLocation();
-
             if (location != null) {
                 Log.d(TAG, "date:" + formatted + ", lat:" + location.getLatitude() + ", long:" + location.getLongitude());
+                String android_id = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
+                // web GET request
+                url += ("capturedate=" + formatted);
+                url += ("&id=" + android_id);
+                url += ("&lat="+location.getLatitude());
+                url += ("&long="+location.getLongitude());
+                url += ("&alt="+location.getAltitude());
+                // Request a string response from the provided URL.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                Log.d(TAG, "Response is: "+ response.toString());
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                });
+                // Instantiate the RequestQueue.
+                RequestQueue queue = Volley.newRequestQueue(this.getApplicationContext());
+                queue.add(stringRequest);
+
             } else {
                 Log.d(TAG, "Location returned null");
             }
-
-            // web GET request
-            url += ("capturedate=" + formatted);
-            url += ("&id=" + deviceId);
-            url += ("&imei=" + imei);
-            url += ("&mei=" + meid);
-            url += ("&lat="+location.getLatitude());
-            url += ("&long="+location.getLongitude());
-            url += ("&alt="+location.getAltitude());
-
-            // Instantiate the RequestQueue.
-            RequestQueue queue = Volley.newRequestQueue(this.getApplicationContext());
-
-            // Request a string response from the provided URL.
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // Display the first 500 characters of the response string.
-                            Log.d(TAG, "Response is: "+ response.toString());
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, error.toString());
-                }
-            });
-
-            // Add the request to the RequestQueue.
-            queue.add(stringRequest);
-
-            // TODO
-            // queue if that fails
 
         } else {
             // can't get location, so ask user to enable GPS/network in settings
