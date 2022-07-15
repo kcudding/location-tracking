@@ -32,7 +32,7 @@ public class LocationWorker extends Worker {
 
     // debugging
     public static final String TAG = "LOCATION_WORKER";
-
+    public static final int TIME_DELAY = 5 * 60 * 1000;
     // CHANGE THIS TO INSTALL LOCATION OF PHP SCRIPT
     String url = "https://multi-plier.ca/?";
 
@@ -81,6 +81,7 @@ public class LocationWorker extends Worker {
                             @Override
                             public void onResponse(String response) {
                                 // Display the first 500 characters of the response string.
+                                Log.d(TAG, url);
                                 Log.d(TAG, "Response is: "+ response.toString());
                             }
                         }, new Response.ErrorListener() {
@@ -131,7 +132,7 @@ public class LocationWorker extends Worker {
 //        return (int) (dueDate.getTimeInMillis() - currentDate.getTimeInMillis());
 
         // return delay in ms
-        return 10 * 1000; // testing
+        return  TIME_DELAY; // testing (5 min)
     }
 
 }
