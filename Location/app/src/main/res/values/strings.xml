@@ -3,4 +3,9 @@
     <string name = "app_name">Location Tracker</string>
     <string name="start">Start Tracking</string>
     <string name="refresh">Refresh Data</string>
+    <string name="info">
+        Make sure you have location permissions set to Always allow.\n
+        1. Click Enable location.\n
+        2. Permissions > Location > Allow all the time\n\n
+    </string>
 </resources>

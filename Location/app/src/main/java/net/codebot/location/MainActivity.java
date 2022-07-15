@@ -3,7 +3,11 @@ package net.codebot.location;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -83,5 +87,12 @@ public class MainActivity extends Activity {
                 text.append(
                         LocationWorker.updated + "\n"
                 );});
+        final Button enableButton = (Button) findViewById(R.id.app_settings);
+        enableButton.setOnClickListener(event -> {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", getPackageName(), null));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
     }
 }
