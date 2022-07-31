@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import SwiftUI
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
@@ -18,7 +19,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest // Best accuracy
         locationManager.requestAlwaysAuthorization() // Always need location
-        locationManager.startUpdatingLocation()
+        locationManager.startMonitoringSignificantLocationChanges()
     }
     var statusString: String {
             guard let status = locationStatus else {
@@ -26,7 +27,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
             
             switch status {
-            case .notDetermined: return "notDetermined"
+            case .notDetermined:
+                return "notDetermined"
             case .authorizedWhenInUse: return "authorizedWhenInUse"
             case .authorizedAlways: return "authorizedAlways"
             case .restricted: return "restricted"
@@ -35,14 +37,23 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     
-    func sendRequest(long: Double, lat: Double){
-        let str = "?capturedate=0&id=iosEmulator&lat=\(lat)&long=\(lat)&alt=-1"
-        guard let url = URL(string: "https://multi-plier.ca/\(str)") else { return }
-        let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-            guard let data = data else { return }
-            print(String(data: data, encoding: .utf8)!)
+    func sendRequest(long: Double, lat: Double, alt: Double){
+        // TODO: UUID in url
+        let time = Date.now
+        let dateFmt = DateFormatter()
+        dateFmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        let dateStr = dateFmt.string(from: time)
+        @AppStorage("uuid") var uuid: String?
+        
+        if let uuid = uuid {
+            let str = "?capturedate=\(dateStr)&id=\(uuid)&lat=\(lat)&long=\(lat)&alt=\(alt)"
+            guard let url = URL(string: "https://multi-plier.ca/\(str)") else { return }
+            let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+                guard let data = data else { return }
+                print(String(data: data, encoding: .utf8)!)
+            }
+            task.resume()
         }
-        task.resume()
     }
 
 
@@ -54,9 +65,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
             guard let location = locations.last else { return }
             lastLocation = location
-            // TEST REMOVE LATER (SENDS AT EVERY LOCATION UPDATE)
-            // TODO:
-            sendRequest(long: (lastLocation?.coordinate.latitude)!, lat: (lastLocation?.coordinate.latitude)!)
+            let lat = lastLocation?.coordinate.latitude ?? -1
+            let long = lastLocation?.coordinate.latitude ?? -1
+            let alt = lastLocation?.altitude ?? -1
+            sendRequest(long: long, lat: lat, alt: alt)
             print(#function, location)
         }
 }
