@@ -32,7 +32,7 @@ public class LocationWorker extends Worker {
 
     // debugging
     public static final String TAG = "LOCATION_WORKER";
-    public static final int TIME_DELAY = 5 * 60 * 1000;
+    public static final int TIME_DELAY = 5 * 60 * 1000; // testing (5 min)
     // CHANGE THIS TO INSTALL LOCATION OF PHP SCRIPT
     String url = "https://multi-plier.ca/?";
 
@@ -132,7 +132,7 @@ public class LocationWorker extends Worker {
 //        return (int) (dueDate.getTimeInMillis() - currentDate.getTimeInMillis());
 
         // return delay in ms
-        return  TIME_DELAY; // testing (5 min)
+        return  TIME_DELAY;
     }
 
 }
