@@ -14,12 +14,17 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     @Published var locationStatus: CLAuthorizationStatus?
     @Published var lastLocation: CLLocation?
+    var lastUpdateTime: Date
+    let timeInterval: TimeInterval = 10.0 // Update time interval
     override init() {
+        lastUpdateTime = Date.now
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest // Best accuracy
         locationManager.requestAlwaysAuthorization() // Always need location
-        locationManager.startMonitoringSignificantLocationChanges()
+        locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.startUpdatingLocation()
+
     }
     var statusString: String {
             guard let status = locationStatus else {
@@ -37,7 +42,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     
-    func sendRequest(long: Double, lat: Double, alt: Double){
+    func requestPermission(){
+        locationManager.requestAlwaysAuthorization() // Always need location
+        locationManager.allowsBackgroundLocationUpdates = true
+    }
+    func sendRequest(long: Double, lat: Double, alt: Double, lastUpdateTime: Date) -> Date{
         // TODO: UUID in url
         let time = Date.now
         let dateFmt = DateFormatter()
@@ -46,14 +55,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         @AppStorage("uuid") var uuid: String?
         
         if let uuid = uuid {
-            let str = "?capturedate=\(dateStr)&id=\(uuid)&lat=\(lat)&long=\(lat)&alt=\(alt)"
-            guard let url = URL(string: "https://multi-plier.ca/\(str)") else { return }
+            let str = "?capturedate=\(dateStr)&id=\(uuid)&lat=\(lat)&long=\(long)&alt=\(alt)"
+            guard let url = URL(string: "https://multi-plier.ca/\(str)") else { return lastUpdateTime }
             let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
                 guard let data = data else { return }
                 print(String(data: data, encoding: .utf8)!)
             }
             task.resume()
+            return time
         }
+        return lastUpdateTime
     }
 
 
@@ -66,9 +77,14 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             guard let location = locations.last else { return }
             lastLocation = location
             let lat = lastLocation?.coordinate.latitude ?? -1
-            let long = lastLocation?.coordinate.latitude ?? -1
+            let long = lastLocation?.coordinate.longitude ?? -1
             let alt = lastLocation?.altitude ?? -1
-            sendRequest(long: long, lat: lat, alt: alt)
+            //sendRequest(long: long, lat: lat, alt: alt)
+            let delta = Date.now.timeIntervalSince1970 - lastUpdateTime.timeIntervalSince1970
+            print(#function, "Time Since last update: \(delta)s")
+            if(delta > timeInterval){ // Update every 10 seconds
+                lastUpdateTime = sendRequest(long: long, lat: lat, alt: alt, lastUpdateTime: lastUpdateTime)
+            }
             print(#function, location)
         }
 }
