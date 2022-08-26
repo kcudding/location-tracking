@@ -77,15 +77,23 @@ public class MainActivity extends Activity {
                 // first request runs immediately and schedules the next one
                 OneTimeWorkRequest locationRequest = new OneTimeWorkRequest.Builder(LocationWorker.class).build();
                 WorkManager.getInstance(getApplicationContext()).enqueue(locationRequest);
-                text.setText("Start location tracking\n\n");
+                text.setText("Started location tracking\n\n");
+                start.setEnabled(false);
             }
         });
 
         // start tracking handler
         final Button refresh = (Button) findViewById(R.id.refresh);
         refresh.setOnClickListener(event -> {
+                String locText = "No Location data";
+                if(LocationWorker.location != null){
+                    String lat = Double.toString(LocationWorker.location.getLatitude());
+                    String lg = Double.toString(LocationWorker.location.getLongitude());
+                    String alt = Double.toString(LocationWorker.location.getAltitude());
+                    locText = lat + "," + lg + "," + alt + ";";
+                }
                 text.append(
-                        LocationWorker.updated + "\n"
+                        LocationWorker.updated + "\n" + locText + "\n"
                 );});
         final Button enableButton = (Button) findViewById(R.id.app_settings);
         enableButton.setOnClickListener(event -> {

@@ -15,7 +15,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var locationStatus: CLAuthorizationStatus?
     @Published var lastLocation: CLLocation?
     var lastUpdateTime: Date
-    let timeInterval: TimeInterval = 10.0 // Update time interval
+    let timeInterval: TimeInterval = 60 * 10.0 // Update time interval (seconds)
     override init() {
         lastUpdateTime = Date.now
         super.init()
@@ -47,7 +47,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager.allowsBackgroundLocationUpdates = true
     }
     func sendRequest(long: Double, lat: Double, alt: Double, lastUpdateTime: Date) -> Date{
-        // TODO: UUID in url
         let time = Date.now
         let dateFmt = DateFormatter()
         dateFmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
