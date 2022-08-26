@@ -1,0 +1,34 @@
+<?php
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+
+$capturedate = $_GET['capturedate'];
+$id =  $_GET['id'];
+$lat = $_GET['lat'];
+$long = $_GET['long'];
+$alt = $_GET['alt'];
+
+$txt = $capturedate.",".$id.",".$lat.",".$long.",".$alt;
+
+$filename = "../data.csv";
+
+if (!file_exists ($filename)) {
+    $handle = fopen($filename, 'w+');
+    if(isset($capturedate) && isset($id) && isset($lat) && isset($long) && isset($alt)){
+        $myfile = file_put_contents($filename, "capturedate,id,lat,long,alt".PHP_EOL , FILE_APPEND | LOCK_EX);
+    }
+    else{
+        echo "Invalid Req";
+    }
+    fclose($handle);
+}
+$handle = fopen($filename, 'a+');
+if(isset($capturedate) && isset($id) && isset($lat) && isset($long) && isset($alt)){
+        $myfile = file_put_contents($filename, $txt.PHP_EOL, FILE_APPEND | LOCK_EX);
+}
+fclose($handle);
+echo $txt;
+?>

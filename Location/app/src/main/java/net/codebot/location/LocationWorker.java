@@ -32,7 +32,7 @@ public class LocationWorker extends Worker {
 
     // debugging
     public static final String TAG = "LOCATION_WORKER";
-    public static final int TIME_DELAY = 5 * 60 * 1000; // testing (5 min)
+    public static final int TIME_DELAY =  10000; // testing (5 sec)
     // CHANGE THIS TO INSTALL LOCATION OF PHP SCRIPT
     String url = "https://multi-plier.ca/?";
 
